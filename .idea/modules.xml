@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DSA_ARENA_LATEST_BACKEND.iml" filepath="$PROJECT_DIR$/.idea/DSA_ARENA_LATEST_BACKEND.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dsa-arena-backend/dsa-arena-backend.iml" filepath="$PROJECT_DIR$/dsa-arena-backend/dsa-arena-backend.iml" />
     </modules>
   </component>
 </project>

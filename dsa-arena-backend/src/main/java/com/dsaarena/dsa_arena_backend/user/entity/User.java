@@ -1,5 +1,6 @@
 package com.dsaarena.dsa_arena_backend.user.entity;
 
+import com.dsaarena.dsa_arena_backend.enums.AuthProvider;
 import com.dsaarena.dsa_arena_backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,7 +26,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -41,6 +42,13 @@ public class User implements UserDetails {
     @Builder.Default
     @Column(nullable = false)
     private boolean isVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(unique = true)
+    private String providerId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
