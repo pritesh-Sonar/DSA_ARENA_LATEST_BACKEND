@@ -31,7 +31,6 @@ public class TicTacToeService {
         TicTacToeGame game = getGame(roomId);
         if (game == null) return;
 
-        // Validate turn and cell availability
         if (!game.getStatus().equals("PLAYING") || !game.getCurrentTurn().equals(symbol)) {
             return;
         }
@@ -39,21 +38,17 @@ public class TicTacToeService {
             return;
         }
 
-        // Apply move
         game.makeMove(index, symbol);
 
-        // Check for Win or Draw
         if (checkWin(game.getBoard(), symbol)) {
             game.setStatus("WON");
             game.setWinner(symbol);
         } else if (isBoardFull(game.getBoard())) {
             game.setStatus("DRAW");
         } else {
-            // Switch turn
             game.setCurrentTurn(symbol.equals("X") ? "O" : "X");
         }
 
-        // Broadcast updated state to all players subscribed to this room
         messagingTemplate.convertAndSend("/topic/game/" + roomId, game);
     }
 
@@ -85,9 +80,9 @@ public class TicTacToeService {
 
     private boolean checkWin(String[] b, String s) {
         int[][] winPatterns = {
-                {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Rows
-                {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Columns
-                {0, 4, 8}, {2, 4, 6}             // Diagonals
+                {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
+                {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+                {0, 4, 8}, {2, 4, 6}
         };
 
         for (int[] p : winPatterns) {
@@ -103,5 +98,36 @@ public class TicTacToeService {
             if (cell == null) return false;
         }
         return true;
+    }
+
+    public void handleRematch(String roomId, String username) {
+        TicTacToeGame game = getGame(roomId);
+        if (game == null) return;
+
+        // If the opponent had previously declined and this player re-requests,
+        // clear the stale decline flag so the UI doesn't show old state.
+        if (game.isRematchDeclined()) {
+            game.setRematchDeclined(false);
+        }
+
+        game.getRematchRequests().add(username);
+
+        if (game.getRematchRequests().size() == 2) {
+            game.resetGame();
+        }
+
+        messagingTemplate.convertAndSend("/topic/game/" + roomId, game);
+    }
+
+    // NEW: handle a player declining the rematch
+    public void handleRematchDecline(String roomId, String username) {
+        TicTacToeGame game = getGame(roomId);
+        if (game == null) return;
+
+        game.setRematchDeclined(true);
+
+        System.out.println("❌ Player " + username + " declined rematch in room: " + roomId);
+
+        messagingTemplate.convertAndSend("/topic/game/" + roomId, game);
     }
 }
