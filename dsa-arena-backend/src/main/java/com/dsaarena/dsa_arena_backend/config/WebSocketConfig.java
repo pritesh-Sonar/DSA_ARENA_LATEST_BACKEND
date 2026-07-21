@@ -1,6 +1,7 @@
 package com.dsaarena.dsa_arena_backend.config;
 
 import com.dsaarena.dsa_arena_backend.game.websocket.JwtChannelInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -12,17 +13,21 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final String frontendUrl;
     private final JwtChannelInterceptor jwtChannelInterceptor;
 
     // Inject our custom JWT interceptor
-    public WebSocketConfig(JwtChannelInterceptor jwtChannelInterceptor) {
+    public WebSocketConfig(
+            JwtChannelInterceptor jwtChannelInterceptor,
+            @Value("${frontend.url}") String frontendUrl) {
         this.jwtChannelInterceptor = jwtChannelInterceptor;
+        this.frontendUrl = frontendUrl;
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:5173") // Your React Vite port
+                .setAllowedOrigins(frontendUrl) // Your React Vite port
                 .withSockJS();
     }
 

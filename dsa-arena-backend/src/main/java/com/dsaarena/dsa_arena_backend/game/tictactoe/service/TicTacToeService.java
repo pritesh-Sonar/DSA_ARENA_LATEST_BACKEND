@@ -1,6 +1,7 @@
 package com.dsaarena.dsa_arena_backend.game.tictactoe.service;
 
 import com.dsaarena.dsa_arena_backend.game.tictactoe.model.TicTacToeGame;
+import com.dsaarena.dsa_arena_backend.game.tictactoe.util.TicTacToeRules;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,10 +41,10 @@ public class TicTacToeService {
 
         game.makeMove(index, symbol);
 
-        if (checkWin(game.getBoard(), symbol)) {
+        if (TicTacToeRules.checkWin(game.getBoard(), symbol)) {
             game.setStatus("WON");
             game.setWinner(symbol);
-        } else if (isBoardFull(game.getBoard())) {
+        } else if (TicTacToeRules.isBoardFull(game.getBoard())) {
             game.setStatus("DRAW");
         } else {
             game.setCurrentTurn(symbol.equals("X") ? "O" : "X");
@@ -76,28 +77,6 @@ public class TicTacToeService {
                 activeGames.remove(roomId);
             }
         }
-    }
-
-    private boolean checkWin(String[] b, String s) {
-        int[][] winPatterns = {
-                {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
-                {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
-                {0, 4, 8}, {2, 4, 6}
-        };
-
-        for (int[] p : winPatterns) {
-            if (s.equals(b[p[0]]) && s.equals(b[p[1]]) && s.equals(b[p[2]])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isBoardFull(String[] b) {
-        for (String cell : b) {
-            if (cell == null) return false;
-        }
-        return true;
     }
 
     public void handleRematch(String roomId, String username) {
